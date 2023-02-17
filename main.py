@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import messagebox
 from random import choice, randint, shuffle
 import pyperclip
+import json
 
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
 
@@ -30,17 +31,25 @@ def save():
     website = website_entry.get()
     email = email_entry.get()
     password = password_entry.get()
+    dict_to_save = {
+        website: {
+            "email": email,
+            "password": password
+        }
+    }
 
     if len(website) == 0 or len(password) == 0:
         messagebox.showinfo(title="Oops", message="Please make sure you haven't left any fields empty.")
     else:
-        is_ok = messagebox.askokcancel(title=website, message=f"These are the details entered: \nEmail: {email} "
-                                                      f"\nPassword: {password} \nIs it ok to save?")
-        if is_ok:
-            with open("data.txt", "a") as data_file:
-                data_file.write(f"{website} | {email} | {password}\n")
-                website_entry.delete(0, END)
-                password_entry.delete(0, END)
+        with open("data.json", "r") as data_file:
+            data = json.load(data_file)
+            data.update(dict_to_save)
+
+        with open("data.json", "w") as data_file:
+            json.dump(databbb, data_file, indent=4)
+
+            website_entry.delete(0, END)
+            password_entry.delete(0, END)
 
 
 # ---------------------------- UI SETUP ------------------------------- #
@@ -64,7 +73,7 @@ password_label.grid(row=3, column=0)
 
 #Entries
 website_entry = Entry(width=35)
-website_entry.grid(row=1, column=1, columnspan=2, sticky="we")
+website_entry.grid(row=1, column=1, columnspan=1, sticky="we")
 website_entry.focus()
 email_entry = Entry(width=35)
 email_entry.grid(row=2, column=1, columnspan=2, sticky="we")
@@ -73,9 +82,11 @@ password_entry = Entry(width=21)
 password_entry.grid(row=3, column=1, sticky="we")
 
 # Buttons
+search_button = Button(text="Search", width=36, command=save)
+search_button.grid(row=1, column=2, columnspan=1)
 generate_password_button = Button(text="Generate Password", command=generate_password)
 generate_password_button.grid(row=3, column=2, sticky="we")
 add_button = Button(text="Add", width=36, command=save)
-add_button.grid(row=4, column=1, columnspan=2)
+add_button.grid(row=4, column=1, columnspan=2, sticky="we")
 
 window.mainloop()
